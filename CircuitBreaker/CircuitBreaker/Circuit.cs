@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IDL.Net.CircuitBreaker
 {
@@ -10,7 +12,7 @@ namespace IDL.Net.CircuitBreaker
 
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
-        internal Circuit(Func<TResult> function, int threshold, TimeSpan? timeout = null)
+        public Circuit(Func<TResult> function, int threshold, TimeSpan? timeout = null)
         {
             _function = function;
             _threshold = threshold;
@@ -25,6 +27,8 @@ namespace IDL.Net.CircuitBreaker
         public Action<string> Logger { private get; set; }
 
         public CircuitState State { get; private set; }
+
+        public Type[] ExcludedExceptions { get; set; } 
 
         public TResult Execute()
         {
@@ -48,6 +52,11 @@ namespace IDL.Net.CircuitBreaker
             }
             catch(Exception ex)
             {
+                if (ExcludedExceptions != null && ExcludedExceptions.Contains(ex.GetType()))
+                {
+                    throw;
+                }
+
                 state.ResetTime = DateTime.UtcNow.Add(_timeout);
                 if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration == _threshold)
                 {

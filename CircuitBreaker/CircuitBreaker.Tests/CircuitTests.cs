@@ -143,5 +143,27 @@ namespace CircuitBreaker.Tests
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
             circuit.State.CurrentIteration.Should().Be(1);
         }
+
+        [Test]
+        public void CheckThatExcludedExceptionsAreThrown()
+        {
+            var circuit = new Circuit<string>(() => { throw new ArgumentException(); }, 1)
+            {
+                ExcludedExceptions = new [] {typeof(NullReferenceException) }
+            };
+
+            var circuit1 = circuit;
+            Action excecution = () => circuit1.Execute();
+            excecution.ShouldNotThrow<ArgumentException>();
+            circuit.State.Position.Should().Be(CircuitPosition.Open);
+
+            circuit = new Circuit<string>(() => { throw new NullReferenceException(); }, 1)
+            {
+                ExcludedExceptions = new[] { typeof(NullReferenceException) }
+            };
+
+            excecution = () => circuit.Execute();
+            excecution.ShouldThrow<NullReferenceException>();
+        }
     }
 }
