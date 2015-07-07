@@ -9,7 +9,7 @@ namespace CircuitBreaker.Tests
     public class CircuitTests
     {
         [Test]
-        public void CicuitBreakerBreaksOnFailureAndSetsTheStateToOpenAfterTheThresholdIsReached()
+        public void CircuitBreakerBreaksOnFailureAndSetsTheStateToOpenAfterTheThresholdIsReached()
         {
             var circuit = new Circuit<string>(() => { throw new Exception(); }, 2);
 
@@ -153,8 +153,8 @@ namespace CircuitBreaker.Tests
             };
 
             var circuit1 = circuit;
-            Action excecution = () => circuit1.Execute();
-            excecution.ShouldNotThrow<ArgumentException>();
+            Action execution = () => circuit1.Execute();
+            execution.ShouldNotThrow<ArgumentException>();
             circuit.State.Position.Should().Be(CircuitPosition.Open);
 
             circuit = new Circuit<string>(() => { throw new NullReferenceException(); }, 1)
@@ -162,8 +162,8 @@ namespace CircuitBreaker.Tests
                 ExcludedExceptions = new[] { typeof(NullReferenceException) }
             };
 
-            excecution = () => circuit.Execute();
-            excecution.ShouldThrow<NullReferenceException>();
+            execution = () => circuit.Execute();
+            execution.ShouldThrow<NullReferenceException>();
         }
     }
 }
