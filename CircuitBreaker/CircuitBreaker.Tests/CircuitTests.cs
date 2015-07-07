@@ -60,10 +60,7 @@ namespace CircuitBreaker.Tests
                 Action action = () => circuit.Execute();
                 action.ShouldThrow<CircuitOpenException>();
 
-                if (DateTime.UtcNow > failSafe)
-                {
-                    throw new Exception("Test timeout");
-                }
+                failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
             }
 
             circuit.State.Position.Should().Be(CircuitPosition.HalfOpen);
@@ -89,10 +86,7 @@ namespace CircuitBreaker.Tests
                 Action action = () => circuit.Execute();
                 action.ShouldThrow<CircuitOpenException>();
 
-                if (DateTime.UtcNow > failSafe)
-                {
-                    throw new Exception("Test timeout");
-                }
+                failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
             }
 
             circuit.State.Position.Should().Be(CircuitPosition.HalfOpen);
@@ -114,10 +108,7 @@ namespace CircuitBreaker.Tests
 
             while (DateTime.UtcNow < circuit.State.ResetTime)
             {
-                if (DateTime.UtcNow > failSafe)
-                {
-                    throw new Exception("Test timeout");
-                }
+                failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
             }
 
             circuit.State.Position.Should().Be(CircuitPosition.HalfOpen);
@@ -150,10 +141,7 @@ namespace CircuitBreaker.Tests
 
             while (DateTime.UtcNow < circuit.State.ResetTime)
             {
-                if (DateTime.UtcNow > failSafe)
-                {
-                    throw new Exception("Test timeout");
-                }
+                failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
             }
 
             throwException[0] = false;
