@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading;
 
 namespace IDL.Net.CircuitBreaker
 {
     public class CircuitState
     {
+        private int _currentIteration;
+
         private CircuitPosition _position;
 
         public CircuitState()
@@ -11,7 +14,7 @@ namespace IDL.Net.CircuitBreaker
             CurrentIteration = 1;
         }
 
-        public int CurrentIteration { get; internal set; }
+        public int CurrentIteration { get { return _currentIteration; } internal set { _currentIteration = value; } }
 
         public DateTime ResetTime { get; internal set; }
 
@@ -28,6 +31,11 @@ namespace IDL.Net.CircuitBreaker
             }
 
             set { _position = value; }
+        }
+
+        public void Increment()
+        {
+            Interlocked.Increment(ref _currentIteration);
         }
     }
 }

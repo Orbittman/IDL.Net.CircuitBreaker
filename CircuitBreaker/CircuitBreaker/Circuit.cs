@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace IDL.Net.CircuitBreaker
@@ -37,41 +36,70 @@ namespace IDL.Net.CircuitBreaker
 
         public TResult Execute(CircuitState state)
         {
-            if (State.Position == CircuitPosition.Open)
+            if (state.Position == CircuitPosition.Open)
             {
                 throw new CircuitOpenException();
             }
 
             try
             {
-                var response =  _function();
+                var response = _function();
                 state.CurrentIteration = 1;
                 state.Position = CircuitPosition.Closed;
 
                 return response;
             }
-            catch(Exception ex)
+            catch (AggregateException ex)
             {
-                if (ExcludedExceptions != null && ExcludedExceptions.Contains(ex.GetType()))
+                bool handled = true;
+                ex.Handle(e =>
+                {
+                    var response = HandleException(e, state);
+                    if (!response)
+                    {
+                        handled = false;
+                    }
+
+                    return response;
+                });
+
+                if (!handled)
                 {
                     throw;
                 }
-
-                state.ResetTime = DateTime.UtcNow.Add(_timeout);
-                if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration == _threshold)
-                {
-                    state.Position = CircuitPosition.Open;
-                }
-
-                state.CurrentIteration++;
-
-                if (Logger != null)
-                {
-                    Logger(ex.Message);
-                }
-
-                return default(TResult);
             }
+            catch (Exception ex)
+            {
+                if (!HandleException(ex, state))
+                {
+                    throw;
+                }
+            }
+
+            return default(TResult);
+        }
+
+        private bool HandleException(Exception exception, CircuitState state)
+        {
+            if (ExcludedExceptions != null && ExcludedExceptions.Contains(exception.GetType()))
+            {
+                return false;
+            }
+
+            state.ResetTime = DateTime.UtcNow.Add(_timeout);
+            if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration >= _threshold)
+            {
+                state.Position = CircuitPosition.Open;
+            }
+
+            state.Increment();
+
+            if (Logger != null)
+            {
+                Logger(exception.Message);
+            }
+
+            return true;
         }
     }
 }
