@@ -23,11 +23,11 @@ namespace IDL.Net.CircuitBreaker
             State = new CircuitState { Position = CircuitPosition.Closed };
         }
 
+        public Type[] ExcludedExceptions { get; set; }
+
         public Action<string> Logger { private get; set; }
 
         public CircuitState State { get; private set; }
-
-        public Type[] ExcludedExceptions { get; set; } 
 
         public TResult Execute()
         {
@@ -51,17 +51,18 @@ namespace IDL.Net.CircuitBreaker
             }
             catch (AggregateException ex)
             {
-                bool handled = true;
-                ex.Handle(e =>
-                {
-                    var response = HandleException(e, state);
-                    if (!response)
+                var handled = true;
+                ex.Handle(
+                    e =>
                     {
-                        handled = false;
-                    }
+                        var response = HandleException(e, state);
+                        if (!response)
+                        {
+                            handled = false;
+                        }
 
-                    return response;
-                });
+                        return response;
+                    });
 
                 if (!handled)
                 {

@@ -14,9 +14,17 @@ namespace IDL.Net.CircuitBreaker
             CurrentIteration = 1;
         }
 
-        public int CurrentIteration { get { return _currentIteration; } internal set { _currentIteration = value; } }
-
-        public DateTime ResetTime { get; internal set; }
+        public int CurrentIteration
+        {
+            get
+            {
+                return _currentIteration;
+            }
+            internal set
+            {
+                _currentIteration = value;
+            }
+        }
 
         public CircuitPosition Position
         {
@@ -30,8 +38,13 @@ namespace IDL.Net.CircuitBreaker
                 return _position;
             }
 
-            set { _position = value; }
+            set
+            {
+                _position = value;
+            }
         }
+
+        public DateTime ResetTime { get; internal set; }
 
         public void Increment()
         {

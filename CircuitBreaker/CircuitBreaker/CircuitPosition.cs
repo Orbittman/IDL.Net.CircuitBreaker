@@ -3,7 +3,9 @@
     public enum CircuitPosition
     {
         Closed,
+
         HalfOpen,
+
         Open
     }
 }
