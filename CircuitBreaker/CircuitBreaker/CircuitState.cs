@@ -11,7 +11,13 @@ namespace IDL.Net.CircuitBreaker
 
         public CircuitState()
         {
-            CurrentIteration = 1;
+            Reset();
+        }
+
+        public void Reset()
+        {
+            CurrentIteration = 0;
+            _position = CircuitPosition.Closed;
         }
 
         public int CurrentIteration

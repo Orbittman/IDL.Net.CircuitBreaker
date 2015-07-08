@@ -44,8 +44,7 @@ namespace IDL.Net.CircuitBreaker
             try
             {
                 var response = _function();
-                state.CurrentIteration = 1;
-                state.Position = CircuitPosition.Closed;
+                state.Reset();
 
                 return response;
             }
@@ -88,12 +87,11 @@ namespace IDL.Net.CircuitBreaker
             }
 
             state.ResetTime = DateTime.UtcNow.Add(_timeout);
+            state.Increment();
             if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration >= _threshold)
             {
                 state.Position = CircuitPosition.Open;
             }
-
-            state.Increment();
 
             if (Logger != null)
             {

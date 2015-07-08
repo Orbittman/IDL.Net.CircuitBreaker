@@ -137,7 +137,7 @@ namespace CircuitBreaker.Tests
             circuit.Execute();
             circuit.Execute();
             circuit.State.Position.Should().Be(CircuitPosition.Open);
-            circuit.State.CurrentIteration.Should().BeGreaterThan(threshold);
+            circuit.State.CurrentIteration.Should().Be(threshold);
 
             while (DateTime.UtcNow < circuit.State.ResetTime)
             {
@@ -148,7 +148,7 @@ namespace CircuitBreaker.Tests
             circuit.Execute();
 
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
-            circuit.State.CurrentIteration.Should().Be(1);
+            circuit.State.CurrentIteration.Should().Be(0);
         }
 
         [Test]
