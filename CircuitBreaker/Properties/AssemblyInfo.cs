@@ -2,13 +2,13 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("CircuitBreaker")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("IDL circuit breaker library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Invitation Digital Ltd.")]
 [assembly: AssemblyProduct("CircuitBreaker")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCulture("en-GB")]
 
 [assembly: ComVisible(false)]
 
