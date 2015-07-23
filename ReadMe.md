@@ -1,4 +1,4 @@
-# IDL.CircuitBreaker
+# IDL.Net.CircuitBreaker
 This is a simple circuit breaker library with the ability to maintain the state outside of the circuit class itself. This allows it to be used in an environment where multiple typed responses are required but using a single circuit state for all of them. 
 
 We needed to not have a timer that would reset the circuit but have that based on a timestamp. This way a new circuit could be interrogated at any point and evaluate it's state based on the CircuitState object that was passed to the operation excecution.
