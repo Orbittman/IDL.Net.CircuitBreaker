@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircuitBreaker", "CircuitBreaker\CircuitBreaker.csproj", "{75D978C4-3B69-4883-AEA9-BDC1B4D685D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IDL.Net.CircuitBreaker", "CircuitBreaker\IDL.Net.CircuitBreaker.csproj", "{75D978C4-3B69-4883-AEA9-BDC1B4D685D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircuitBreaker.Tests", "CircuitBreaker.Tests\CircuitBreaker.Tests.csproj", "{58C28635-BA5D-4473-9799-E3D1A93B488A}"
 EndProject

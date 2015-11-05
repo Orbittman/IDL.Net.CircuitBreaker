@@ -54,9 +54,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CircuitBreaker\CircuitBreaker.csproj">
+    <ProjectReference Include="..\CircuitBreaker\IDL.Net.CircuitBreaker.csproj">
       <Project>{75D978C4-3B69-4883-AEA9-BDC1B4D685D0}</Project>
-      <Name>CircuitBreaker</Name>
+      <Name>IDL.Net.CircuitBreaker</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
