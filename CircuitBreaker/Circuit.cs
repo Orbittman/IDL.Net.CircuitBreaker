@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IDL.Net.CircuitBreaker
@@ -21,9 +22,12 @@ namespace IDL.Net.CircuitBreaker
             }
 
             State = new CircuitState { Position = CircuitPosition.Closed };
+            ExceptionFilters = new List<Func<Exception, bool>>();
         }
 
         public Type[] ExcludedExceptions { get; set; }
+
+        public List<Func<Exception, bool>> ExceptionFilters { get; set; }
 
         public Action<string> Logger { private get; set; }
 
@@ -50,55 +54,43 @@ namespace IDL.Net.CircuitBreaker
             }
             catch (AggregateException ex)
             {
-                var handled = true;
                 ex.Handle(
                     e =>
                     {
-                        var response = HandleException(e, state);
-                        if (!response)
-                        {
-                            handled = false;
-                        }
-
-                        return response;
+                        HandleException(e, state);
+                        return false;
                     });
 
-                if (!handled)
-                {
-                    throw;
-                }
+                throw;
             }
             catch (Exception ex)
             {
-                if (!HandleException(ex, state))
-                {
-                    throw;
-                }
+                HandleException(ex, state);
+                throw;
             }
-
-            return default(TResult);
         }
 
-        private bool HandleException(Exception exception, CircuitState state)
+        private void HandleException(Exception exception, CircuitState state)
         {
-            if (ExcludedExceptions != null && ExcludedExceptions.Contains(exception.GetType()))
+            if (ExceptionFilters.Any(filter => filter(exception)))
             {
-                return false;
+                return;
             }
 
-            state.ResetTime = DateTime.UtcNow.Add(_timeout);
-            state.Increment();
-            if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration >= _threshold)
+            if (ExcludedExceptions == null || !ExcludedExceptions.Contains(exception.GetType()))
             {
-                state.Position = CircuitPosition.Open;
-            }
+                state.ResetTime = DateTime.UtcNow.Add(_timeout);
+                state.Increment();
+                if (state.Position == CircuitPosition.HalfOpen || state.CurrentIteration >= _threshold)
+                {
+                    state.Position = CircuitPosition.Open;
+                }
 
-            if (Logger != null)
-            {
-                Logger(exception.Message);
+                if (Logger != null)
+                {
+                    Logger(exception.Message);
+                }
             }
-
-            return true;
         }
     }
 }
