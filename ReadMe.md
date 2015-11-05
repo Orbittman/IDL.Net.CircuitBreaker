@@ -40,3 +40,4 @@ Console.WriteLine(circuit.Execute(state));
 Console.WriteLine(state.State);
 // outputs "Closed"
 ````
+[![idl-net-circuitbreaker MyGet Build Status](https://www.myget.org/BuildSource/Badge/idl-net-circuitbreaker?identifier=120a36b5-b247-406f-b808-20e1532228bc)](https://www.myget.org/)
