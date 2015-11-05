@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IDL.Net.CircuitBreaker</RootNamespace>
-    <AssemblyName>CircuitBreaker</AssemblyName>
+    <AssemblyName>IDL.Net.CircuitBreaker</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
