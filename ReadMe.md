@@ -6,18 +6,22 @@ We needed to not have a timer that would reset the circuit but have that based o
 
 The circuit state maintains the position of the circuit Open | Half open | Closed, the current failure count and a time that the circuit is reset. 
 
-````c#
-var circuit = new Circuit<TResponse>(() => { throw new Exception();  }, 5, TimeSpan.FromSeconds(5));
+````csharp
+var circuit = new Circuit<TResponse>(
+   () => { throw new Exception();  }, 
+   5, 
+   TimeSpan.FromSeconds(5));
+
 var state = new CircuitState();
 
-for(int i = 0; i < 6; i++){
-  try{
-    circuit.Execute(state);
-  }catch(CircuitOpenException){
-    Console.WriteLine("The circuit is now open");
-  }catch(Exception){
-    Console.WriteLine("The circuit is closed");
-  }
+for(int i = 0; i < 6; i++)
+{
+   try
+      circuit.Execute(state);
+   catch(CircuitOpenException)
+      Console.WriteLine("The circuit is now open");
+   catch(Exception)
+      Console.WriteLine("The circuit is closed");
 }
 ````
 This will output:  
