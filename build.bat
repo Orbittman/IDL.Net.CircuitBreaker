@@ -9,6 +9,9 @@ if not "%PackageVersion%" == "" (
    set version=-Version %GitVersion.ClassicVersionWithTag%
 )
 
+REM Package restore
+call %NuGet% restore CircuitBreaker.Tests\packages.config -OutputDirectory %cd%\packages -NonInteractive
+
 REM Build
 %WINDIR%\Microsoft.NET\Framework\v4.0.30319\msbuild IDL.Net.CircuitBreaker.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
 if not "%errorlevel%"=="0" goto failure
