@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>IDL.CircuitBreaker.Net</id>
+        <id>IDL.Net.CircuitBreaker</id>
         <version>1.0.0</version>
         <authors>Tim Barton</authors>
         <licenseUrl>http://www.gnu.org/licenses/gpl-2.0.txt</licenseUrl>
@@ -13,6 +13,6 @@
         <tags>circuitbreaker, circuit, breaker, patterns</tags>
     </metadata>
     <files>
-        <file src="bin\release\CircuitBreaker.dll" target="lib\Net45\IDL.CircuitBreaker.Net.dll" />
+        <file src="bin\release\IDL.Net.CircuitBreaker.dll" target="lib\Net45\IDL.CircuitBreaker.Net.dll" />
     </files>
 </package>
