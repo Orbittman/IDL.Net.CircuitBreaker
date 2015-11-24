@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>IDL.CircuitBreaker.Net</id>
+        <version>1.0.0</version>
+        <authors>Tim Barton</authors>
+        <licenseUrl>http://www.gnu.org/licenses/gpl-2.0.txt</licenseUrl>
+        <projectUrl>https://github.com/InvitationDigital/IDL.Net.CircuitBreaker</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>.Net library implementing the circuit breaker pattern allowing for a stateless circuit</description>
+        <summary />
+        <releaseNotes>Initial release</releaseNotes>
+        <tags>circuitbreaker, circuit, breaker, patterns</tags>
+    </metadata>
+    <files>
+        <file src="bin\release\CircuitBreaker.dll" target="lib\Net45\IDL.CircuitBreaker.Net.dll" />
+    </files>
+</package>
