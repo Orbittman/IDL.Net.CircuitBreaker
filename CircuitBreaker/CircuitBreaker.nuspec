@@ -3,7 +3,8 @@
     <metadata>
         <id>IDL.Net.CircuitBreaker</id>
         <version>1.0.0</version>
-        <authors>Tim Barton</authors>
+        <authors>Invitation Digital Ltd.</authors>
+        <owners>Invitation Digital Ltd.</owners>
         <licenseUrl>http://www.gnu.org/licenses/gpl-2.0.txt</licenseUrl>
         <projectUrl>https://github.com/InvitationDigital/IDL.Net.CircuitBreaker</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
