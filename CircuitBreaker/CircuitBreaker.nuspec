@@ -14,6 +14,6 @@
         <tags>circuitbreaker, circuit, breaker, patterns</tags>
     </metadata>
     <files>
-        <file src="bin\release\CircuitBreaker.dll" target="lib\Net45\CircuitBreaker.dll" />
+        <file src="bin\release\IDL.Net.CircuitBreaker.dll" target="lib\Net45\IDL.Net.CircuitBreaker.dll" />
     </files>
 </package>
