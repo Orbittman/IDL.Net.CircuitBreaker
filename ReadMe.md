@@ -1,4 +1,4 @@
-[![idl-public MyGet Build Status](https://www.myget.org/BuildSource/Badge/idl-public?identifier=4beaf4f5-bef5-4064-8151-68d3a0b241a9)](https://www.myget.org/)
+[![idl-public MyGet Build Status](https://www.myget.org/BuildSource/Badge/idl-public?identifier=95c60c91-9607-478d-b51a-679426498ab6)](https://www.myget.org/)
 # IDL.Net.CircuitBreaker
 This is a simple circuit breaker library with the ability to maintain the state outside of the circuit class itself. This allows it to be used in an environment where multiple typed responses are required but using a single circuit state for all of them. 
 
