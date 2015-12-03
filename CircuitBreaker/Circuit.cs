@@ -33,10 +33,7 @@ namespace IDL.Net.CircuitBreaker
 
         public async Task<TResult> ExecuteAsync(CircuitState state, Func<Task<TResult>> function)
         {
-            if (state.Position == CircuitPosition.Open)
-            {
-                throw new CircuitOpenException();
-            }
+            AssertState(state.Position);
 
             try
             {
@@ -65,10 +62,7 @@ namespace IDL.Net.CircuitBreaker
 
         public TResult Execute(CircuitState state, Func<TResult> function)
         {
-            if (state.Position == CircuitPosition.Open)
-            {
-                throw new CircuitOpenException();
-            }
+            AssertState(state.Position);
 
             try
             {
@@ -92,6 +86,14 @@ namespace IDL.Net.CircuitBreaker
             {
                 HandleException(ex, state);
                 throw;
+            }
+        }
+
+        private void AssertState(CircuitPosition position)
+        {
+            if (position == CircuitPosition.Open)
+            {
+                throw new CircuitOpenException();
             }
         }
 
