@@ -11,7 +11,7 @@ namespace IDL.Net.CircuitBreaker
 
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
-        public Circuit(int threshold, TimeSpan? timeout = null)
+        public Circuit(int threshold, TimeSpan? timeout = null, CircuitState state = null)
         {
             _threshold = threshold;
             if (timeout.HasValue)
@@ -19,7 +19,7 @@ namespace IDL.Net.CircuitBreaker
                 _timeout = timeout.Value;
             }
 
-            State = new CircuitState { Position = CircuitPosition.Closed };
+            State = state ?? new CircuitState { Position = CircuitPosition.Closed };
             ExceptionFilters = new List<Func<Exception, bool>>();
         }
 
@@ -31,14 +31,14 @@ namespace IDL.Net.CircuitBreaker
 
         public CircuitState State { get; private set; }
 
-        public async Task<TResult> ExecuteAsync(CircuitState state, Func<Task<TResult>> function)
+        public async Task<TResult> ExecuteAsync(Func<Task<TResult>> function)
         {
-            AssertState(state.Position);
+            AssertState(State.Position);
 
             try
             {
                 var response = await function().ConfigureAwait(false);
-                state.Reset();
+                State.Reset();
 
                 return response;
             }
@@ -47,7 +47,7 @@ namespace IDL.Net.CircuitBreaker
                 ex.Handle(
                     e =>
                     {
-                        HandleException(e, state);
+                        HandleException(e, State);
                         return false;
                     });
 
@@ -55,19 +55,19 @@ namespace IDL.Net.CircuitBreaker
             }
             catch (Exception ex)
             {
-                HandleException(ex, state);
+                HandleException(ex, State);
                 throw;
             }
         }
 
-        public TResult Execute(CircuitState state, Func<TResult> function)
+        public TResult Execute(Func<TResult> function)
         {
-            AssertState(state.Position);
+            AssertState(State.Position);
 
             try
             {
                 var response = function();
-                state.Reset();
+                State.Reset();
 
                 return response;
             }
@@ -76,7 +76,7 @@ namespace IDL.Net.CircuitBreaker
                 ex.Handle(
                     e =>
                     {
-                        HandleException(e, state);
+                        HandleException(e, State);
                         return false;
                     });
 
@@ -84,7 +84,7 @@ namespace IDL.Net.CircuitBreaker
             }
             catch (Exception ex)
             {
-                HandleException(ex, state);
+                HandleException(ex, State);
                 throw;
             }
         }

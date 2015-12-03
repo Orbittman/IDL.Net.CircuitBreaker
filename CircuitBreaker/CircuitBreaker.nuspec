@@ -10,7 +10,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>.Net library implementing the circuit breaker pattern allowing for a stateless circuit</description>
         <summary />
-        <releaseNotes>Initial release</releaseNotes>
+        <releaseNotes>Breaking changes that have introduced asynchronous function calls that correctly handle exceptions</releaseNotes>
         <tags>circuitbreaker, circuit, breaker, patterns</tags>
     </metadata>
     <files>

@@ -15,22 +15,22 @@ namespace CircuitBreaker.Tests
         public void CheckThatExcludedExceptionsAreThrown()
         {
             var exception = new ArgumentException();
-            var circuit = new Circuit<string>(() => { throw exception; }, 1)
+            var circuit = new Circuit<string>(1)
             {
                 ExcludedExceptions = new[] { typeof(NullReferenceException) }
             };
 
             var circuit1 = circuit;
-            Action execution = () => circuit1.Execute();
+            Action execution = () => circuit1.Execute(() => { throw exception; });
             execution.ShouldThrow<ArgumentException>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Open);
 
-            circuit = new Circuit<string>(() => { throw new NullReferenceException(); }, 1)
+            circuit = new Circuit<string>(1)
             {
                 ExcludedExceptions = new[] { typeof(NullReferenceException) }
             };
 
-            execution = () => circuit.Execute();
+            execution = () => circuit.Execute(() => { throw new NullReferenceException(); });
             execution.ShouldThrow<NullReferenceException>();
         }
 
@@ -38,13 +38,13 @@ namespace CircuitBreaker.Tests
         public void CheckThatExcludedExceptionsAreIgnored()
         {
             var exception = new NullReferenceException();
-            var circuit = new Circuit<string>(() => { throw exception; }, 1)
+            var circuit = new Circuit<string>(1)
             {
                 ExcludedExceptions = new[] { typeof(NullReferenceException) }
             };
 
             var circuit1 = circuit;
-            Action execution = () => circuit1.Execute();
+            Action execution = () => circuit1.Execute(() => { throw exception; });
             execution.ShouldThrow<NullReferenceException>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
         }
@@ -54,11 +54,11 @@ namespace CircuitBreaker.Tests
         {
             const string message = "testMessage";
             var exception = new Exception(message);
-            var circuit = new Circuit<string>(() => { throw exception; }, 1);
+            var circuit = new Circuit<string>(1);
             circuit.ExceptionFilters.Add(e => e.Message == message);
 
             var circuit1 = circuit;
-            Action execution = () => circuit1.Execute();
+            Action execution = () => circuit1.Execute(() => { throw exception; });
             execution.ShouldThrow<Exception>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
         }
@@ -70,26 +70,26 @@ namespace CircuitBreaker.Tests
             bool[] throwException = { true };
             var failSafe = DateTime.UtcNow.Add(timeSpan.Add(timeSpan));
             var exception = new Exception();
-            var circuit = new Circuit<string>(
-                () =>
+            var circuit = new Circuit<string>(1, timeSpan);
+            Func<string> function = () =>
+            {
+                if (throwException[0])
                 {
-                    if (throwException[0])
-                    {
-                        throw exception;
-                    }
+                    throw exception;
+                }
 
-                    return "success";
-                },
-                1,
-                timeSpan);
+                return "success";
+            };
 
-            Action first = () => circuit.Execute();
+            Action first = () => circuit.Execute(function);
+
             first.ShouldThrow<Exception>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Open);
 
             while (DateTime.UtcNow < circuit.State.ResetTime)
             {
-                Action action = () => circuit.Execute();
+                Action action = () => circuit.Execute(function);
+
                 action.ShouldThrow<CircuitOpenException>();
 
                 failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
@@ -98,7 +98,7 @@ namespace CircuitBreaker.Tests
             circuit.State.Position.Should().Be(CircuitPosition.HalfOpen);
 
             throwException[0] = false;
-            circuit.Execute();
+            circuit.Execute(function);
 
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
         }
@@ -107,12 +107,12 @@ namespace CircuitBreaker.Tests
         public void CheckThatTheCircuitFailsUntilTheCircuitIsHalfOpenAgainThenOpensAgainOnFailure()
         {
             var timeSpan = TimeSpan.FromSeconds(1);
-            var circuit = new Circuit<string>(() => { throw new Exception(); }, 1, timeSpan);
+            var circuit = new Circuit<string>(1, timeSpan);
             var failSafe = DateTime.UtcNow.Add(timeSpan.Add(timeSpan));
 
             try
             {
-                circuit.Execute();
+                circuit.Execute(() => { throw new Exception(); });
             }
             catch
             {
@@ -121,7 +121,7 @@ namespace CircuitBreaker.Tests
 
             while (DateTime.UtcNow < circuit.State.ResetTime)
             {
-                Action action = () => circuit.Execute();
+                Action action = () => circuit.Execute(() => { throw new Exception(); });
                 action.ShouldThrow<CircuitOpenException>();
 
                 failSafe.Should().BeAfter(DateTime.UtcNow, "otherwise the test has timed out");
@@ -130,7 +130,7 @@ namespace CircuitBreaker.Tests
             circuit.State.Position.Should().Be(CircuitPosition.HalfOpen);
             try
             {
-                circuit.Execute();
+                circuit.Execute(() => { throw new Exception(); });
             }
             catch
             {
@@ -143,12 +143,12 @@ namespace CircuitBreaker.Tests
         {
             var timeSpan = TimeSpan.FromSeconds(1);
             var exception = new Exception();
-            var circuit = new Circuit<string>(() => { throw exception; }, 1, timeSpan);
+            var circuit = new Circuit<string>(1, timeSpan);
             var failSafe = DateTime.UtcNow.Add(timeSpan.Add(timeSpan));
 
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
 
-            Action first = () => circuit.Execute();
+            Action first = () => circuit.Execute(() => { throw exception; });
             first.ShouldThrow<Exception>().Where(e => e == exception);
 
             circuit.State.Position.Should().Be(CircuitPosition.Open);
@@ -169,21 +169,19 @@ namespace CircuitBreaker.Tests
             bool[] throwException = { true };
             const int threshold = 2;
             var exception = new Exception();
-            var circuit = new Circuit<string>(
-                () =>
+            Func<string> function = () =>
+            {
+                if (throwException[0])
                 {
-                    if (throwException[0])
-                    {
-                        throw exception;
-                    }
+                    throw exception;
+                }
 
-                    return "success";
-                },
-                threshold,
-                timeSpan);
+                return "success";
+            };
+            var circuit = new Circuit<string>(threshold, timeSpan);
 
-            Action first = () => circuit.Execute();
-            Action second = () => circuit.Execute();
+            Action first = () => circuit.Execute(function);
+            Action second = () => circuit.Execute(function);
             first.ShouldThrow<Exception>().Where(e => e == exception);
             second.ShouldThrow<Exception>().Where(e => e == exception);
 
@@ -196,7 +194,7 @@ namespace CircuitBreaker.Tests
             }
 
             throwException[0] = false;
-            circuit.Execute();
+            circuit.Execute(function);
 
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
             circuit.State.CurrentIteration.Should().Be(0);
@@ -206,13 +204,13 @@ namespace CircuitBreaker.Tests
         public void CircuitBreakerBreaksOnFailureAndSetsTheStateToOpenAfterTheThresholdIsReached()
         {
             var exception = new Exception();
-            var circuit = new Circuit<string>(() => { throw exception; }, 2);
+            var circuit = new Circuit<string>(2);
 
-            Action first = () => circuit.Execute();
+            Action first = () => circuit.Execute(() => { throw exception; });
             first.ShouldThrow<Exception>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Closed);
 
-            Action second = () => circuit.Execute();
+            Action second = () => circuit.Execute(() => { throw exception; });
             second.ShouldThrow<Exception>().Where(e => e == exception);
             circuit.State.Position.Should().Be(CircuitPosition.Open);
         }
