@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IDL.Net.CircuitBreaker
 {
     public class Circuit<TResult> : ICircuit<TResult>
     {
-        private readonly Func<TResult> _function;
-
         private readonly int _threshold;
 
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
-        public Circuit(Func<TResult> function, int threshold, TimeSpan? timeout = null)
+        public Circuit(int threshold, TimeSpan? timeout = null)
         {
-            _function = function;
             _threshold = threshold;
             if (timeout.HasValue)
             {
@@ -33,12 +31,7 @@ namespace IDL.Net.CircuitBreaker
 
         public CircuitState State { get; private set; }
 
-        public TResult Execute()
-        {
-            return Execute(State);
-        }
-
-        public TResult Execute(CircuitState state)
+        public async Task<TResult> ExecuteAsync(CircuitState state, Func<Task<TResult>> function)
         {
             if (state.Position == CircuitPosition.Open)
             {
@@ -47,7 +40,39 @@ namespace IDL.Net.CircuitBreaker
 
             try
             {
-                var response = _function();
+                var response = await function().ConfigureAwait(false);
+                state.Reset();
+
+                return response;
+            }
+            catch (AggregateException ex)
+            {
+                ex.Handle(
+                    e =>
+                    {
+                        HandleException(e, state);
+                        return false;
+                    });
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, state);
+                throw;
+            }
+        }
+
+        public TResult Execute(CircuitState state, Func<TResult> function)
+        {
+            if (state.Position == CircuitPosition.Open)
+            {
+                throw new CircuitOpenException();
+            }
+
+            try
+            {
+                var response = function();
                 state.Reset();
 
                 return response;
