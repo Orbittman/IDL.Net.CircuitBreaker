@@ -7,29 +7,28 @@ We needed to not have a timer that would reset the circuit but have that based o
 The circuit state maintains the position of the circuit Open | Half open | Closed, the current failure count and a time that the circuit is reset. 
 
 ````csharp
-var circuit = new Circuit<TResponse>(
-   () => { throw new Exception();  }, 
-   5, 
-   TimeSpan.FromSeconds(5));
-
 var state = new CircuitState();
+var circuit = new Circuit<TResponse>(2, TimeSpan.FromSeconds(5), state);
 
 for(int i = 0; i < 6; i++)
 {
    try
-      circuit.Execute(state);
+   {
+      circuit.Execute(() => { throw new Exception());
+   }
    catch(CircuitOpenException)
+   {
       Console.WriteLine("The circuit is now open");
+   }
    catch(Exception)
+   {
       Console.WriteLine("The circuit is closed");
+   }
 }
 ````
 This will output:  
 The circuit is closed  
-The circuit is closed  
-The circuit is closed  
-The circuit is closed  
-The circuit is closed  
+The circuit is closed
 The circuit is now open  
 
 After 5 seconds the circuit will become 'half open' and allow one more request before entering the open state again. If the circuit operation is successful the circuit will close and the failure count reset.
@@ -38,10 +37,17 @@ Thread.Sleep(5000);
 Console.WriteLine(state.State);
 // outputs "HalfOpen"
 
-circuit = new Circuit<string>(() => "Test passed" , 5, TimeSpan.FromSeconds(5));
-Console.WriteLine(circuit.Execute(state));
+circuit = new Circuit<string>(2, TimeSpan.FromSeconds(5), state);
+Console.WriteLine(circuit.Execute(() => "Test passed"));
 // outputs "Test passed"
 
 Console.WriteLine(state.State);
 // outputs "Closed"
+````
+
+For asynchronous operations use
+````c#
+var state = new CircuitState();
+var circuit = new Circuit<TResponse>(2, TimeSpan.FromSeconds(5), state);
+var asyncResponse = circuit.ExecuteAsync(() => Task.Run(() => {}))
 ````
