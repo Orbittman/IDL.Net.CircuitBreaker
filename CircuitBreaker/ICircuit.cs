@@ -9,4 +9,11 @@ namespace IDL.Net.CircuitBreaker
 
         Task<TResult> ExecuteAsync(Func<Task<TResult>> function);
     }
+
+    public interface ICircuit
+    {
+        void Execute(Action action);
+
+        Task ExecuteAsync(Action action);
+    }
 }
