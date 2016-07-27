@@ -6,7 +6,7 @@
         <authors>Invitation Digital Ltd.</authors>
         <owners>Invitation Digital Ltd.</owners>
         <licenseUrl>http://www.gnu.org/licenses/gpl-2.0.txt</licenseUrl>
-        <projectUrl>https://github.com/InvitationDigital/IDL.Net.CircuitBreaker</projectUrl>
+        <projectUrl>http://techblog.invitationdigital.com/IDL.Net.CircuitBreaker/</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>.Net library implementing the circuit breaker pattern allowing for a stateless circuit</description>
         <summary />
