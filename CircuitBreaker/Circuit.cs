@@ -11,7 +11,7 @@ namespace IDL.Net.CircuitBreaker
 
         protected readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 
-        public Circuit(int threshold, TimeSpan? timeout, CircuitState state)
+        public Circuit(int threshold, TimeSpan? timeout = null, CircuitState state = null)
         {
             Threshold = threshold;
             if (timeout.HasValue)
@@ -29,43 +29,46 @@ namespace IDL.Net.CircuitBreaker
 
         public Action<string> Logger { private get; set; }
 
-        public CircuitState State { get; private set; }
+        public CircuitState State { get; }
 
         public async Task ExecuteAsync(Action action)
         {
             AssertState(State.Position);
+            await Task.Run(() => action).ContinueWith(t => CallMethod(() => t.GetAwaiter().GetResult()));
+        }
 
-            try
-            {
-                await Task.Run(() => action).ConfigureAwait(false);
-                State.Reset();
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle(
-                    e =>
-                    {
-                        HandleException(e, State);
-                        return false;
-                    });
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, State);
-                throw;
-            }
+        public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> function)
+        {
+            AssertState(State.Position);
+            return await function().ContinueWith(t => CallMethod(() => t.GetAwaiter().GetResult()));
         }
 
         public void Execute(Action action)
         {
             AssertState(State.Position);
 
+            CallMethod(
+                () =>
+                {
+                    action();
+                    return true;
+                });
+        }
+
+        public TResult Execute<TResult>(Func<TResult> function)
+        {
+            AssertState(State.Position);
+            return CallMethod(function);
+        }
+
+        public TResult CallMethod<TResult>(Func<TResult> function)
+        {
             try
             {
-                action();
+                var response = function();
                 State.Reset();
+
+                return response;
             }
             catch (AggregateException ex)
             {
@@ -101,10 +104,7 @@ namespace IDL.Net.CircuitBreaker
                     state.Position = CircuitPosition.Open;
                 }
 
-                if (Logger != null)
-                {
-                    Logger.Invoke(exception.Message);
-                }
+                Logger?.Invoke(exception.Message);
             }
         }
 
@@ -113,72 +113,6 @@ namespace IDL.Net.CircuitBreaker
             if (position == CircuitPosition.Open)
             {
                 throw new CircuitOpenException();
-            }
-        }
-    }
-
-    public class Circuit<TResult> : Circuit, ICircuit<TResult>
-    {
-        public Circuit(int threshold, TimeSpan? timeout = null, CircuitState state = null)
-            : base(threshold, timeout, state)
-        {
-        }
-
-        public async Task<TResult> ExecuteAsync(Func<Task<TResult>> function)
-        {
-            AssertState(State.Position);
-
-            try
-            {
-                var response = await function().ConfigureAwait(false);
-                State.Reset();
-
-                return response;
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle(
-                    e =>
-                    {
-                        HandleException(e, State);
-                        return false;
-                    });
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, State);
-                throw;
-            }
-        }
-
-        public TResult Execute(Func<TResult> function)
-        {
-            AssertState(State.Position);
-
-            try
-            {
-                var response = function();
-                State.Reset();
-
-                return response;
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle(
-                    e =>
-                    {
-                        HandleException(e, State);
-                        return false;
-                    });
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, State);
-                throw;
             }
         }
     }
