@@ -61,33 +61,6 @@ namespace IDL.Net.CircuitBreaker
             return CallMethod(function);
         }
 
-        public TResult CallMethod<TResult>(Func<TResult> function)
-        {
-            try
-            {
-                var response = function();
-                State.Reset();
-
-                return response;
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle(
-                    e =>
-                    {
-                        HandleException(e, State);
-                        return false;
-                    });
-
-                throw;
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, State);
-                throw;
-            }
-        }
-
         protected void HandleException(Exception exception, CircuitState state)
         {
             if (ExceptionFilters.Any(filter => filter(exception)))
@@ -113,6 +86,33 @@ namespace IDL.Net.CircuitBreaker
             if (position == CircuitPosition.Open)
             {
                 throw new CircuitOpenException();
+            }
+        }
+
+        private TResult CallMethod<TResult>(Func<TResult> function)
+        {
+            try
+            {
+                var response = function();
+                State.Reset();
+
+                return response;
+            }
+            catch (AggregateException ex)
+            {
+                ex.Handle(
+                    e =>
+                    {
+                        HandleException(e, State);
+                        return false;
+                    });
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, State);
+                throw;
             }
         }
     }
