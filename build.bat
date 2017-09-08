@@ -13,7 +13,7 @@ REM Package restore
 call %NuGet% restore CircuitBreaker.Tests\packages.config -OutputDirectory %cd%\packages -NonInteractive
 
 REM Build
-call "%msbuild%" IDL.Net.CircuitBreaker.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
+call "%msbuild%" IDL.Net.CircuitBreaker.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false %version%
 if not "%errorlevel%"=="0" goto failure
 
 REM Unit tests
