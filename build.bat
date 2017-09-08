@@ -6,7 +6,7 @@ if "%config%" == "" (
 
 set version=
 if not "%PackageVersion%" == "" (
-   set version=-Version %GitVersion.ClassicVersionWithTag%
+   set version=%GitVersion.NuGetVersionV2%
 )
 
 REM Package restore
@@ -22,7 +22,7 @@ if not "%errorlevel%"=="0" goto failure
 
 REM Package
 mkdir Build
-call %nuget% pack "CircuitBreaker\CircuitBreaker.nuspec" -symbols -o Build -p Configuration=%config% %version%
+call %nuget% pack "CircuitBreaker\CircuitBreaker.nuspec" -Version %version% -symbols -o Build -p Configuration=%config%
 if not "%errorlevel%"=="0" goto failure
 
 :success
