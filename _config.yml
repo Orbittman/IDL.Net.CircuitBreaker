@@ -1,0 +1,8 @@
+title: Idl.net.circuitbreaker
+description: Circuit breaker implementation using a time stamp to reset the circuit
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
